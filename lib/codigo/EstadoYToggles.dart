@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:flutter_sound/public/flutter_sound_recorder.dart';
 import 'package:micronotasytags/codigo/Nota.dart';
+import 'package:micronotasytags/codigo/gestorArchivos.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
@@ -27,8 +28,12 @@ class Estado with ChangeNotifier {
     grabador = FlutterSoundRecorder();
     player = FlutterSoundPlayer();
     ini();
-    // GestorArchivos.cargarTags(tags);
-    // GestorArchivos.cargarNotas(notas);
+    try {
+      GestorArchivos.cargarNotas(notas);
+      GestorArchivos.cargarTags(tags);
+    } catch (e) {
+      print('no se pudo leer el archivo: $e');
+    }
   }
 
   Future<void> ini() async {
@@ -66,8 +71,6 @@ class Estado with ChangeNotifier {
   }
 
   Future<void> stop() async {
-    //stop grabacion
-    print('stop');
     await grabador?.stopRecorder();
     grabando = false;
     toggleBotonesFlotantes();
@@ -102,19 +105,19 @@ class Estado with ChangeNotifier {
     nota.path = path;
     nroDeAudio++;
     nota.texto = 'nota $nroDeAudio';
-    // DateTime now = DateTime.now();
+    DateTime now = DateTime.now();
 
-    // String dia = dias[now.weekday];
-    // addTag(dia);
-    // nota.addTag(dia);
+    String dia = dias[now.weekday];
+    addTag(dia);
+    nota.addTag(dia);
 
-    // String mes = meses[now.month];
-    // addTag(mes);
-    // nota.addTag(mes);
+    String mes = meses[now.month];
+    addTag(mes);
+    nota.addTag(mes);
 
-    // String anio = now.year.toString();
-    // addTag(anio);
-    // nota.addTag(anio);
+    String anio = now.year.toString();
+    addTag(anio);
+    nota.addTag(anio);
 
     notas.add(nota);
     notasFiltradas.addAll(List.from(notasResguardo));
@@ -122,10 +125,8 @@ class Estado with ChangeNotifier {
 
     indiceNotaRecuadro = notasFiltradas.length - 1;
     this.nota = nota;
-    // GestorArchivos.grabarAudio(nota);
-    // GestorArchivos.grabarNotas(notas);
+    GestorArchivos.grabarNotas(notas);
     notifyListeners();
-    // downloadFileFromBlobUrl(path,'hh.wav');
   }
 
   final dias = [
@@ -162,29 +163,29 @@ class Estado with ChangeNotifier {
 
   Future<void> borrarNota(Nota n) async {
     // stopPlaying();
-    notas.remove(n);
-    // GestorArchivos.grabarNotas(notas);
-    notasFiltradas = List.from(notas);
-    notifyListeners();
-    // LINUX
-    // print('borrando');
-    // final file = File(n.path);
-
-    // try {
-    //   if (await file.exists()) {
-    //     stopPlaying();
-    //     await file.delete();
-    //     GestorArchivos.grabarNotas(notas);
-    //     print('Archivo borrado exitosamente');
-    //   } else {
-    //     print('El archivo no existe');
-    //   }
-    // } catch (e) {
-    //   print('Error al borrar el archivo: $e');
-    // }
     // notas.remove(n);
+    // GestorArchivos.grabarNotas(notas);
     // notasFiltradas = List.from(notas);
     // notifyListeners();
+    // LINUX
+    // print('borrando');
+    final file = File(n.path);
+
+    try {
+      if (await file.exists()) {
+        stopPlaying();
+        await file.delete();
+        GestorArchivos.grabarNotas(notas);
+        print('Archivo borrado exitosamente');
+      } else {
+        print('El archivo no existe');
+      }
+    } catch (e) {
+      print('Error al borrar el archivo: $e');
+    }
+    notas.remove(n);
+    notasFiltradas = List.from(notas);
+    notifyListeners();
   }
 
   void borrarTodasLasNotas() {
@@ -197,7 +198,7 @@ class Estado with ChangeNotifier {
   void addNotaTag(Nota? nota, String tag) {
     if (nota != null) {
       nota.addTag(tag);
-      // GestorArchivos.grabarNotas(notas);
+      GestorArchivos.grabarNotas(notas);
     } else {
       if (tagsBusqueda.contains(tag)) {
         tagsBusqueda.remove(tag);
@@ -246,7 +247,7 @@ class Estado with ChangeNotifier {
   void addTag(tag) {
     if (!tags.contains(tag) && tag != '') {
       tags.add(tag);
-      // GestorArchivos.grabarTags(tags);
+      GestorArchivos.grabarTags(tags);
       notifyListeners();
     }
   }
@@ -256,7 +257,7 @@ class Estado with ChangeNotifier {
     for (Nota n in notas) {
       if (n.tags.contains(tag)) n.tags.remove(tag);
     }
-    // GestorArchivos.grabarTags(tags);
+    GestorArchivos.grabarTags(tags);
     notifyListeners();
   }
 
@@ -265,7 +266,7 @@ class Estado with ChangeNotifier {
     for (String t in exTags) {
       tagRemove(t);
     }
-    // GestorArchivos.grabarTags(tags);
+    GestorArchivos.grabarTags(tags);
   }
 
   void borrarAlgunosLosTags() {
@@ -282,7 +283,7 @@ class Estado with ChangeNotifier {
       if (borrar) {
         tags.remove(t);
       }
-      // GestorArchivos.grabarTags(tags);
+      GestorArchivos.grabarTags(tags);
     }
   }
 

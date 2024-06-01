@@ -6,157 +6,96 @@
 // import 'package:path_provider/path_provider.dart';
 // import 'package:universal_html/html.dart' as html;
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:micronotasytags/codigo/Nota.dart';
+import 'package:path_provider/path_provider.dart';
 
 class GestorArchivos {
-  static grabarAudio(Nota nota) {
-    // String nombre = 'notas_$nota.path.wav';
-    // // nota.path = nombre;
-    // final anchor = html.AnchorElement(href: nota.path)
-    //   ..setAttribute('download', nota.path)
-    //   ..click();
+  // static Future<String> dameCarpetaDeTrabajo() async {
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   return '${directory.path}/microNotasYTytags';
+  // }
+  // Future<String> notasTxtPath() async {
+  //   final directory = await getApplicationDocumentsDirectory();
+
+  //   return '${directory.path}/my_file.txt';
+  // }
+   static Future<String> notasTxtPath() async {
+    final carpetaSistema = await getExternalStorageDirectory();
+    final miCarpeta = Directory('${carpetaSistema?.path}/MicroNotesYTags');
+    if (!miCarpeta.existsSync()) {
+      miCarpeta.createSync();
+    }
+    return '${miCarpeta.path}/notas.txt';
+  }
+   static Future<String> tagsTxtPath() async {
+    final carpetaSistema = await getExternalStorageDirectory();
+    final miCarpeta = Directory('${carpetaSistema?.path}/MicroNotesYTags');
+    if (!miCarpeta.existsSync()) {
+      miCarpeta.createSync();
+    }
+    return '${miCarpeta.path}/tags.txt';
   }
 
   static Future<void> grabarNotas(var notas) async {
     print('\n\n\nGRABO\n\n');
     final texto = todasLasNotasATexto(notas);
-    // void setCookie(String MicriNotesAndTags, String value, int days) {
-    final espira = DateTime.now().add(Duration(days: 30));
-    final espiraString = espira.toUtc().toIso8601String();
-    // html.document.cookie =
-    //     'MicroNotesYTags=$texto;expires=$espiraString;path=/';
+    String filePath = await notasTxtPath();
+    final file = File(filePath);
+    await file.writeAsString(texto);
   }
 
-  // final bytes = utf8.encode(texto); // Convierte el contenido a bytes
-  // final blob = html.Blob([bytes]); // Crea un Blob a partir de los bytes
-  // final url = html.Url.createObjectUrlFromBlob(
-  //     blob); // Crea una URL temporal para el Blob
-
-  // final anchor = html.AnchorElement(href: url)
-  //   ..setAttribute('download',
-  //       'notas.txt') // Establece el nombre del archivo para la descarga
-  //   ..click(); // Simula un clic para iniciar la descarga
-
-  // html.Url.revokeObjectUrl(url); // Libera la URL temporal
-
-  // var path =
-  //     (await getApplicationDocumentsDirectory()).path + '/notas/notas.txt';
-  // final file = File(path);
-
-  // try {
-  //   // Convertir el objeto a JSON
-  //   final texto = todasLasNotasATexto(notas);
-
-  //   // Escribir el JSON en el archivo
-  //   await file.writeAsString(texto);
-  // } catch (e) {
-  //   print('Error al guardar el objeto: $e');
-  // }
-  // }
-
   static Future<void> grabarTags(tags) async {
-    // final texto = jsonEncode(tags);
+    String path = await tagsTxtPath();
 
-    // final espira = DateTime.now().add(Duration(days: 30));
-    // final espiraString = espira.toUtc().toIso8601String();
-    // html.document.cookie =
-    //     'MicroNotesYTagsTags=$texto;expires=$espiraString;path=/';
-
-    // codigo para LINUX
-    // var path =
-    //     (await getApplicationDocumentsDirectory()).path + '/notas/tags.txt';
-    // final file = File(path);
-    // try {
-    //   final texto = jsonEncode(tags);
-
-    //   // Escribir el JSON en el archivo
-    //   await file.writeAsString(texto);
-    // } catch (e) {
-    //   print('Error al guardar el objeto: $e');
-    // }
+    final file = File(path);
+    try {
+      final texto = jsonEncode(tags);
+      await file.writeAsString(texto);
+    } catch (e) {
+      print('Error al guardar el objeto: $e');
+    }
   }
 
   static void cargarNotas(notas) async {
-    // String? getCookie(String name) {
-    // String texto = '';
-    // final cookies = html.document.cookie?.split('; ') ?? [];
-    // for (var cookie in cookies) {
-    //   final cookieParts = cookie.split('=');
-    //   if (cookieParts[0] == 'MicroNotesYTags') {
-    //     texto += cookieParts.sublist(1).join('=');
-    //   }
-    // }
-    // print('cookie');
-    // print(texto);
-    // texto.trim();
-    // List<dynamic> array = jsonDecode(texto);
-    // for (var n in array) {
-    //   Nota nueva = fromMap(n);
-    //   notas.add(nueva);
-    // }
-    // codigo para LINUX
+    String path = await notasTxtPath();
 
-    // var path =
-    //     (await getApplicationDocumentsDirectory()).path + '/notas/notas.txt';
+    final file = File(path);
 
-    // final file = File(path);
-
-    // try {
-    //   // Leer el JSON del archivo
-    //   var texto = await file.readAsString();
-    //   texto.trim();
-    //   List<dynamic> array = jsonDecode(texto);
-    //   for (var n in array) {
-    //     Nota nueva = fromMap(n);
-    //     notas.add(nueva);
-    //   }
-    //   // Estado.toggleAbrir(null, -2);
-    // } catch (e) {
-    //   print('Error al cargar el objeto: $e');
-    // }
-    // }
+    try {
+      // Leer el JSON del archivo
+      var texto = await file.readAsString();
+      texto.trim();
+      List<dynamic> array = jsonDecode(texto);
+      for (var n in array) {
+        Nota nueva = fromMap(n);
+        notas.add(nueva);
+      }
+      // Estado.toggleAbrir(null, -2);
+    } catch (e) {
+      print('Error al cargar el objeto: $e');
+    }
   }
 
   static void cargarTags(tags) async {
-    String texto = '';
-    // final cookies = html.document.cookie?.split('; ') ?? [];
-    // for (var cookie in cookies) {
-    //   final cookieParts = cookie.split('=');
-    //   if (cookieParts[0] == 'MicroNotesYTagsTags') {
-    //     texto += cookieParts.sublist(1).join('=');
-    //   }
-    // }
-    // print('\ncookie Tags');
-    // print(texto);
-    // texto.trim();
-    // List<dynamic> array = jsonDecode(texto);
-    // for (var n in array) {
-    //   tags.add(n);
-    // }
-    // Codigo para LINUX
-    // List<dynamic> array = jsonDecode(texto);
-    // for (var n in array) {
-    //   Nota nueva = fromMap(n);
-    //   notas.add(nueva);
-    // }
-    //   var path =
-    //       (await getApplicationDocumentsDirectory()).path + '/notas/tags.txt';
+    String path = await tagsTxtPath();
 
-    //   final file = File(path);
+    final file = File(path);
 
-    //   try {
-    //     // Leer el JSON del archivo
-    //     var texto = await file.readAsString();
-    //     texto.trim();
-    //     List<dynamic> array = jsonDecode(texto);
-    //     for (var n in array) {
-    //       tags.add(n);
-    //     }
-    //   } catch (e) {
-    //     print('Error al cargar el objeto: $e');
-    //     // Si hay un error, puedes devolver un objeto predeterminado o lanzar una excepción según tu lógica.
-    //   }
-    // }
+    try {
+      //     // Leer el JSON del archivo
+      var texto = await file.readAsString();
+      texto.trim();
+      List<dynamic> array = jsonDecode(texto);
+      for (var n in array) {
+        tags.add(n);
+      }
+    } catch (e) {
+      print('Error al cargar el objeto: $e');
+      // Si hay un error, puedes devolver un objeto predeterminado o lanzar una excepción según tu lógica.
+    }
   }
 }
 

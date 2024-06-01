@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:micronotasytags/codigo/EstadoYToggles.dart';
+import 'package:micronotasytags/codigo/gestorArchivos.dart';
 import 'package:micronotasytags/widgets/barraBuscar.dart';
 import 'package:micronotasytags/widgets/menu.dart';
 import 'package:micronotasytags/widgets/modales/about.dart';
@@ -71,7 +72,7 @@ class home extends StatelessWidget {
                                       if (estado.controler.text != "")
                                         estado.notasFiltradas[index].texto =
                                             estado.controler.text;
-                                            // GestorArchivos.grabarNotas(estado.notas);
+                                            GestorArchivos.grabarNotas(estado.notas);
                                       estado.inputToggle();
                                     },
                                   ),
@@ -95,7 +96,7 @@ class home extends StatelessWidget {
                                     if (estado.controler.text != "")
                                       estado.notasFiltradas[index].texto =
                                           estado.controler.text;
-                                            // GestorArchivos.grabarNotas(estado.notas);
+                                            GestorArchivos.grabarNotas(estado.notas);
 
                                     estado.inputToggle();
                                   },
