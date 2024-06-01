@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_sound/public/flutter_sound_player.dart';
@@ -64,7 +65,8 @@ class Estado with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> stop() async { //stop grabacion
+  Future<void> stop() async {
+    //stop grabacion
     print('stop');
     await grabador?.stopRecorder();
     grabando = false;
@@ -74,20 +76,14 @@ class Estado with ChangeNotifier {
   }
 
   Future<void> play(var path) async {
-    await player?.startPlayer(fromURI: path);
-    //   // print('abriendo $arch');
-    //   try {
-    //     print ('$path play!!!');
-    //     await player?.play(path);
+    await player?.startPlayer(
+        fromURI: path,
+        whenFinished: () {
+          playing = false;
+          notifyListeners();
+        });
     playing = true;
-    // player?.audioPlayerFinished(1).listen((event) {
-    //   playing = false;
-    //   notifyListeners();
-    // });
     notifyListeners();
-    //   } catch (e) {
-    //     print('error en play $path');
-    //   }
   }
 
   stopPlaying() {
